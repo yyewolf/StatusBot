@@ -1,0 +1,20 @@
+[Unit]
+Description=Snow Status Bot
+
+[Service]
+WorkingDirectory=/root/statusbot/
+LimitNOFILE=1000000
+ExecStart=/root/statusbot/Status
+Restart=always
+RestartSec=1
+
+ # Output to syslog
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=snow-status
+#User=<alternate user>
+#Group=<alternate group>
+
+[Install]
+# Components of this application should be started at boot time
+WantedBy=multi-user.target

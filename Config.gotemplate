@@ -1,0 +1,28 @@
+package main
+
+import (
+	"sync"
+	"time"
+
+	"github.com/bwmarrin/discordgo"
+)
+
+var token = "STRING"
+var prefix = "s!"
+
+//commands
+var commands map[string]func(*discordgo.Session, *discordgo.MessageCreate)
+
+//all ips registered
+var ips map[string]string
+
+//Pings related
+var isPinging bool
+var tempPings map[string]string
+var lastPings map[string]string
+var lastPingTime time.Time
+
+var tempMutex sync.Mutex
+
+//Embed cache
+var embedToSend *discordgo.MessageEmbed
