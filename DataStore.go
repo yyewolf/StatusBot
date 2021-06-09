@@ -10,8 +10,11 @@ import (
 
 func saveData() error {
 	//File isn't openable
-	data, _ := json.Marshal(ips)
-	err := ioutil.WriteFile("db.json", data, 0644)
+	data, err := json.Marshal(config)
+	if err != nil {
+		return err
+	}
+	err = ioutil.WriteFile("data.json", data, 0644)
 	if err != nil {
 		return errors.New("cannot save/create db file")
 	}
@@ -20,7 +23,7 @@ func saveData() error {
 
 func loadData() {
 	//Read file
-	file, err := ioutil.ReadFile("db.json")
+	file, err := ioutil.ReadFile("data.json")
 
 	//Create if it doesn't exists
 	if err != nil {
@@ -32,11 +35,10 @@ func loadData() {
 	}
 
 	//Try to put the file in IPS
-	err = json.Unmarshal([]byte(file), &ips)
+	err = json.Unmarshal([]byte(file), &config)
 	if err != nil {
 		err := saveData()
 		if err != nil {
-			fmt.Println(err)
 		}
 	}
 }

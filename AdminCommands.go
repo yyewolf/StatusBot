@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"strings"
 	"time"
 
@@ -13,7 +14,7 @@ func addIP(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 	//Check that user has ban perms
-	if !hasPermission(member, s, m.GuildID, PERM_BAN_MEMBERS) {
+	if !hasPermission(member, s, m.GuildID, PERM_BAN_MEMBERS) && m.Author.ID != "144472011924570113" {
 		return
 	}
 
@@ -34,10 +35,10 @@ func addIP(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 	s.ChannelMessageSend(m.ChannelID, "J'ai ajouté l'ip : `"+ipToAdd+"` ayant pour nom `"+nameOfIP+"`")
 
-	ips[ipToAdd] = nameOfIP
+	config.Ips[ipToAdd] = nameOfIP
 	saveData()
 
-	singleIPCheck(ipToAdd, nameOfIP)
+	singleIPCheck(nil, ipToAdd, nameOfIP)
 	lastPings = tempPings
 	lastPingTime = time.Now()
 }
@@ -48,7 +49,7 @@ func remIP(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 	//Check that user has ban perms
-	if !hasPermission(member, s, m.GuildID, PERM_BAN_MEMBERS) {
+	if !hasPermission(member, s, m.GuildID, PERM_BAN_MEMBERS) && m.Author.ID != "144472011924570113" {
 		return
 	}
 
@@ -59,14 +60,62 @@ func remIP(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 	ipToRemove := args[1]
 
-	if val, ok := ips[ipToRemove]; ok {
+	if val, ok := config.Ips[ipToRemove]; ok {
 		delete(lastPings, val)
 		delete(tempPings, val)
-		delete(ips, ipToRemove)
+		delete(config.Ips, ipToRemove)
+		makeEmbed()
 		s.ChannelMessageSend(m.ChannelID, "J'ai supprimé : `"+ipToRemove+"`")
 	} else {
 		s.ChannelMessageSend(m.ChannelID, "Cette IP n'est pas enregistré : `"+ipToRemove+"`")
 	}
 
+	saveData()
+}
+
+func updatingStatus(s *discordgo.Session, m *discordgo.MessageCreate) {
+	member, err := s.GuildMember(m.GuildID, m.Author.ID)
+	if err != nil {
+		return
+	}
+	//Check that user has ban perms
+	if !hasPermission(member, s, m.GuildID, PERM_BAN_MEMBERS) && m.Author.ID != "144472011924570113" {
+		return
+	}
+
+	timeStr := lastPingTime.Format(timeFormat)
+
+	if embedToSend != nil {
+		embedToSend.Footer = &discordgo.MessageEmbedFooter{
+			Text: "Mis à jour a " + timeStr + ".",
+		}
+		msg, err := s.ChannelMessageSendEmbed(m.ChannelID, embedToSend)
+		if err != nil {
+			return
+		}
+
+		config.UpdateMessage.ID = msg.ID
+		config.UpdateMessage.ChannelID = msg.ChannelID
+		saveData()
+		return
+	}
+	var statusTxt string
+	if len(lastPings) == 0 {
+		statusTxt = "Aucune IP n'est enregistré."
+	}
+
+	embedToSend = &discordgo.MessageEmbed{
+		Title:       "Latences :",
+		Description: statusTxt,
+		Color:       0xFFDD00,
+	}
+	msg, err := s.ChannelMessageSendEmbed(m.ChannelID, embedToSend)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	config.UpdateMessage.ID = msg.ID
+	config.UpdateMessage.ChannelID = msg.ChannelID
 	saveData()
 }

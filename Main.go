@@ -12,8 +12,8 @@ import (
 
 var sess *discordgo.Session
 
-func init() {
-	ips = make(map[string]string)
+func initialize() {
+	config.Ips = make(map[string]string)
 	commands = make(map[string]func(*discordgo.Session, *discordgo.MessageCreate))
 	lastPings = make(map[string]string)
 	tempPings = make(map[string]string)
@@ -38,6 +38,8 @@ func main() {
 	if err != nil {
 		log.Fatal("Failed to start: ", err)
 	}
+
+	initialize()
 
 	// Wait here until CTRL-C or other term signal is received.
 	sc := make(chan os.Signal, 1)

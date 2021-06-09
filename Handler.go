@@ -8,6 +8,7 @@ import (
 
 func defineCommands() {
 	commands["status"] = status
+	commands["adminstatus"] = updatingStatus
 	commands["addip"] = addIP
 	commands["remip"] = remIP
 }

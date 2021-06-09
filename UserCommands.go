@@ -1,24 +1,15 @@
 package main
 
 import (
-	"fmt"
-	"math"
-	"time"
-
 	"github.com/bwmarrin/discordgo"
 )
 
 func status(s *discordgo.Session, m *discordgo.MessageCreate) {
-	var secondsAgo string
-	i, f := math.Modf(time.Now().Sub(lastPingTime).Seconds())
-	if f < 0 {
-		f = -f
-	}
-	secondsAgo = fmt.Sprint(i)
+	timeStr := lastPingTime.Format(timeFormat)
 
 	if embedToSend != nil {
 		embedToSend.Footer = &discordgo.MessageEmbedFooter{
-			Text: "Mis à jour il y a " + secondsAgo + " secondes.",
+			Text: "Mis à jour a " + timeStr + ".",
 		}
 		s.ChannelMessageSendEmbed(m.ChannelID, embedToSend)
 		return

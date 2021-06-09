@@ -13,8 +13,21 @@ var prefix = "s!"
 //commands
 var commands map[string]func(*discordgo.Session, *discordgo.MessageCreate)
 
-//all ips registered
-var ips map[string]string
+//json db
+type DB struct {
+	//all Ips registered
+	Ips map[string]string
+
+	//will update this message
+	UpdateMessage updateMessageDB
+}
+
+type updateMessageDB struct {
+	ID        string
+	ChannelID string
+}
+
+var config DB
 
 //Pings related
 var isPinging bool
@@ -26,3 +39,6 @@ var tempMutex sync.Mutex
 
 //Embed cache
 var embedToSend *discordgo.MessageEmbed
+
+//Time Layout
+var timeFormat = "15:04:05"
